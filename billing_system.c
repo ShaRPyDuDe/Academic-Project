@@ -79,10 +79,12 @@ void main()
         main();
 
         case '3':
+        getchar();
         displayAllCustomers();
         break;
 
         case '4':
+        getchar();
         deleteAllCustomers();
         break;
         
@@ -237,7 +239,7 @@ void deleteAllCustomers()
 
 void output()
 {
-    printf("\n\n Customer no : %d \n", customer.number);
+    printf("\n\n   Customer no : %d \n", customer.number);
     printf("   Name  :%s \n", customer.name);
     printf("   Mobile no  :%.f \n", customer.mobile_no);
     printf("   Account number  : %d \n", customer.acct_no);
