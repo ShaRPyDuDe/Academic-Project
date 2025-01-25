@@ -27,190 +27,188 @@ struct account {
     float newbalance;
     float payment;
     struct date lastpayment;    
-}customer; 
-int tl, sl, ts;
+} customer;
 
 void main()
 {
-    int i,n;
+    int i, n;
     char ch;
-    system ("cls");
-    printf("  CUSTOMER BILLING SYSTEM : \n\n");
-    printf("==============================\n\n");
-    printf("1:   ADD account on list\n");
-    printf("2:   SEARCH customer account \n");
-    printf("3:   DISPLAY all customer accounts\n");
-    printf("4:   DELETE all customer accounts\n");
-    printf("5:   EXIT\n");
-    printf("==============================\n");
 
-    do
-    {
-        printf("\n select what you want to do ?? \n");
-        ch=getchar();
-    }while(ch<='0' || ch>'5');
-
-    switch(ch)
-    {
-        case '1':
+    do {
         system("cls");
-        printf("\n how many customer accounts:  ");
-        scanf("%d", &n);
-        getchar();
-        for (i=0; i<n; i++){
-            input();
-            if(customer.payment > 0.0)
-            customer.acct_type=(customer.payment < customer.oldbalance) ? 'O' : 'D';
-            else
-            customer.acct_type=(customer.oldbalance > 0) ? 'D' : 'C';
-            customer.newbalance=customer.oldbalance - customer.payment;
-            writefile();
+        printf("  CUSTOMER BILLING SYSTEM : \n\n");
+        printf("==============================\n\n");
+        printf("1:   ADD account on list\n");
+        printf("2:   SEARCH customer account \n");
+        printf("3:   DISPLAY all customer accounts\n");
+        printf("4:   DELETE all customer accounts\n");
+        printf("5:   EXIT\n");
+        printf("==============================\n");
+
+        do {
+            printf("\nSelect what you want to do: ");
+            scanf(" %c", &ch); 
+        } while (ch < '1' || ch > '5');
+
+        switch (ch) {
+            case '1':
+                system("cls");
+                printf("\nHow many customer accounts: ");
+                scanf("%d", &n);
+                getchar();
+                for (i = 0; i < n; i++) {
+                    input();
+                    if (customer.payment > 0.0)
+                        customer.acct_type = (customer.payment < customer.oldbalance) ? 'O' : 'D';
+                    else
+                        customer.acct_type = (customer.oldbalance > 0) ? 'D' : 'C';
+                    customer.newbalance = customer.oldbalance - customer.payment;
+                    writefile();
+                }
+                break;
+
+            case '2':
+                getchar();
+                system("cls");
+                search();
+                break;
+
+            case '3':
+                getchar();
+                displayAllCustomers();
+                break;
+
+            case '4':
+                getchar();
+                deleteAllCustomers();
+                break;
+
+            case '5':
+                system("cls");
+                printf("A PROJECT BY KAWSAR, LABIB, EUSHA");
+                exit(0);
         }
-        main();
-        
-        case '2':
-        getchar();
-        system("cls");
-        printf("search by what??\n\n");
-        printf("1:------- search by customer number \n");
-        printf("2:------- search by customer name \n");
-        search();
-        ch=getchar();
-        main();
-
-        case '3':
-        getchar();
-        displayAllCustomers();
-        break;
-
-        case '4':
-        getchar();
-        deleteAllCustomers();
-        break;
-        
-        case '5':
-        system("cls");             
-        printf("A PROJECT BY KAWSAR, LABIB, EUSHA");
-        exit(1);
-    }    
+    } while (1);
 }
-
 void input()
 {
-    FILE *fp=fopen("file.txt", "ab+");
-    fseek(fp, 0, SEEK_END);
-    tl=ftell(fp);
-    sl=sizeof(customer);
-    ts=tl/sl;
-    fseek(fp, (ts-1)*sl, SEEK_SET);
-    fread(&customer, sizeof(customer), 1, fp);
-    printf("\ncustomer no : %d \n", ++customer.number);
-    fclose(fp);
-    printf("      Account number:  ");
+    FILE *fp = fopen("file.txt", "rb");
+    int count = 0;
+    if (fp != NULL) {
+        while (fread(&customer, sizeof(customer), 1, fp)) {
+            count++;
+        }
+        fclose(fp);
+    }
+
+    customer.number = count + 1;
+    printf("\nCustomer no: %d\n", customer.number);
+    printf("Account number: ");
     scanf("%d", &customer.acct_no);
     getchar();
-    printf("\n    Name:");
+    printf("Name: ");
     scanf("%s", customer.name);
     getchar();
-    printf("\n    mobile no:  ");
-    scanf("%f",&customer.mobile_no);
+    printf("Mobile no: ");
+    scanf("%f", &customer.mobile_no);
     getchar();
-    printf("\n    Street:  ");
+    printf("Street: ");
     scanf("%s", customer.street);
     getchar();
-    printf("\n    city:  ");
+    printf("City: ");
     scanf("%s", customer.city);
     getchar();
-    printf("\n    Previous balance:  ");
+    printf("Previous balance: ");
     scanf("%f", &customer.oldbalance);
     getchar();
-    printf("\n    Current payment:  ");
+    printf("Current payment: ");
     scanf("%f", &customer.payment);
     getchar();
-    printf("\n    Payment date (dd/mm/yyyy):  ");
+    printf("Payment date (dd/mm/yyyy): ");
     scanf("%d/%d/%d", &customer.lastpayment.day, &customer.lastpayment.month, &customer.lastpayment.year);
     getchar();
 }
 
 void writefile()
 {
-    FILE *fp;
-    fp=fopen("file.txt","ab+");
-    fwrite(&customer,sizeof(customer), 1, fp);
+    FILE *fp = fopen("file.txt", "ab");
+    if (fp == NULL) {
+        printf("Error: Unable to open file.\n");
+        return;
+    }
+    fwrite(&customer, sizeof(customer), 1, fp);
     fclose(fp);
-    return;
 }
 
 void search()
 {
-    char ch;
-    char nam[100];
-    int n,i,m=1;
-    FILE *fp;
-    fp=fopen("file.txt","r+");
-    do
-    {
-        printf("\n enter your choice:  ");
-        ch=getchar();
+    char ch, name[100];
+    int number, found = 0;
+    FILE *fp = fopen("file.txt", "rb");
+    if (fp == NULL) {
+        printf("Error: Unable to open file.\n");
+        return;
+    }
 
-    }while(ch!='1' && ch!='2');
-    switch(ch)
-    {
+    printf("\nSearch by:\n");
+    printf("1: Customer number\n");
+    printf("2: Customer name\n");
+
+    do {
+        printf("\nEnter your choice: ");
+        ch = getchar();
+        getchar();
+    } while (ch != '1' && ch != '2');
+
+    switch (ch) {
         case '1':
-        fseek(fp,0,SEEK_END);
-        tl=ftell(fp);
-        sl=sizeof(customer);
-        ts=tl/sl;
-        do
-        {
-            printf("\n choose customer number:  ");
-            scanf("%d", &n);
-            if(n<=0 || n>ts){
-                printf("\n enter correct \n");
-            }
-            else
-            {
-                fseek(fp,(n-1)*sl, SEEK_SET);
-                fread(&customer,sl,1,fp);
-                output();
-            }
-            printf("\n\n again ? (y/n)");
-            ch=getchar();
-        }while(ch == 'y');
-        fclose(fp);
-        break;
-        case '2':
-        fseek(fp, 0, SEEK_END);
-        tl=ftell(fp);
-        sl=sizeof(customer);
-        ts=tl/sl;
-        fseek(fp, (ts-1)*sl, SEEK_SET);
-        fread(&customer, sizeof(customer), 1, fp);
-        n=customer.number;
-        do
-        {
-            printf("\n enter the name:  ");
-            scanf("%s", nam);
-            fseek(fp, 0, SEEK_SET);
-            for(i=1; i<=n; i++)
-            {
-                fread(&customer, sizeof(customer), 1, fp);
-                if(strcmp(customer.name,nam)==0)
-                {
+            printf("\nEnter customer number: ");
+            scanf("%d", &number);
+            getchar();
+            while (fread(&customer, sizeof(customer), 1, fp)) {
+                if (customer.number == number) {
                     output();
-                    m=0;
+                    found = 1;
                     break;
                 }
             }
-            if(m!=0)
-            printf("\n\n doesn't exist \n");
-            printf("\n another ?? (y/n)");
-            ch=getchar();
-        }while(ch=='y');
-        fclose(fp);
+            if (!found)
+                printf("\nCustomer not found.\n");
+            break;
+
+        case '2':
+            printf("\nEnter customer name: ");
+            scanf("%s", name);
+            getchar();
+            while (fread(&customer, sizeof(customer), 1, fp)) {
+                if (strcmp(customer.name, name) == 0) {
+                    output();
+                    found = 1;
+                }
+            }
+            if (!found)
+                printf("\nCustomer not found.\n");
+            break;
     }
-    return;
+    fclose(fp);
+   
+    char choice;
+    printf("\nWould you like to return to the main menu (M) or exit (E)? ");
+    do {
+        scanf("%c", &choice);
+        if (choice == 'M' || choice == 'm') {
+            main();
+        } else if (choice == 'E' || choice == 'e') {
+            exit(0);
+        } else {
+            printf("Invalid choice. Please enter M to return to the menu or E to exit: ");
+        }
+    } while (choice != 'M' && choice != 'm' && choice != 'E' && choice != 'e');
 }
+    
+
+
+
 
 void displayAllCustomers() 
 {
@@ -224,6 +222,19 @@ void displayAllCustomers()
         output();
     }
     fclose(fp);
+
+    char choice;
+    printf("\nWould you like to return to the main menu (M) or exit (E)? ");
+    do {
+        scanf("%c", &choice);
+        if (choice == 'M' || choice == 'm') {
+            main();
+        } else if (choice == 'E' || choice == 'e') {
+            exit(0);
+        } else {
+            printf("Invalid choice. Please enter M to return to the menu or E to exit: ");
+        }
+    } while (choice != 'M' && choice != 'm' && choice != 'E' && choice != 'e');
 }
 
 void deleteAllCustomers()
@@ -235,35 +246,39 @@ void deleteAllCustomers()
     }
     fclose(fp);
     printf("\nAll customer information has been deleted successfully.\n");
+
+    char choice;
+    printf("\nWould you like to return to the main menu (M) or exit (E)? ");
+    do {
+        scanf("%c", &choice);
+        if (choice == 'M' || choice == 'm') {
+            main();
+        } else if (choice == 'E' || choice == 'e') {
+            exit(0);
+        } else {
+            printf("Invalid choice. Please enter M to return to the menu or E to exit: ");
+        }
+    } while (choice != 'M' && choice != 'm' && choice != 'E' && choice != 'e');
 }
 
 void output()
 {
-    printf("\n\n   Customer no : %d \n", customer.number);
-    printf("   Name  :%s \n", customer.name);
-    printf("   Mobile no  :%.f \n", customer.mobile_no);
-    printf("   Account number  : %d \n", customer.acct_no);
-    printf("   Street  : %s \n",customer.street);
-    printf("   City  : %s \n",customer.city);
-    printf("   Old balance  :%.2f \n",customer.oldbalance);
-    printf("   Current payment  :%.2f \n",customer.payment);
-    printf("   New balance  :%.2f \n",customer.newbalance);
-    printf("   Payment date  : %d/%d/%d \n\n",customer.lastpayment.day, customer.lastpayment.month, customer.lastpayment.year);
-    printf("        Account status :");
-    
-    switch(customer.acct_type)
-    {
-        case 'C':
-        printf("CURRENT \n\n");
-        break;
-        case 'O':
-        printf("OVERDUE \n\n");
-        break;
-        case 'D':
-        printf("DELINQUENT \n\n");
-        break;
-        default:
-        printf("ERROR \n\n");
+    printf("\n\nCustomer no: %d\n", customer.number);
+    printf("Name: %s\n", customer.name);
+    printf("Mobile no: %.f\n", customer.mobile_no);
+    printf("Account number: %d\n", customer.acct_no);
+    printf("Street: %s\n", customer.street);
+    printf("City: %s\n", customer.city);
+    printf("Old balance: %.2f\n", customer.oldbalance);
+    printf("Current payment: %.2f\n", customer.payment);
+    printf("New balance: %.2f\n", customer.newbalance);
+    printf("Payment date: %d/%d/%d\n", customer.lastpayment.day, customer.lastpayment.month, customer.lastpayment.year);
+    printf("Account status: ");
+    switch (customer.acct_type) {
+        case 'C': printf("CURRENT\n"); break;
+        case 'O': printf("OVERDUE\n"); break;
+        case 'D': printf("DELINQUENT\n"); break;
+        default: printf("ERROR\n");
     }
-    return ;
+    
 }
